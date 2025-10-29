@@ -37,10 +37,12 @@ public class Complaint {
     @Column(nullable = false)
     private ComplaintType type;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority = Priority.MEDIUM;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ComplaintStatus status = ComplaintStatus.PENDING;

@@ -42,6 +42,7 @@ public class Fee {
     @Column(nullable = false)
     private FeeType feeType;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;

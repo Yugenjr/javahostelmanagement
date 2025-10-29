@@ -50,6 +50,7 @@ public class Room {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal monthlyRent;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RoomStatus status = RoomStatus.AVAILABLE;
