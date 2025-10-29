@@ -9,15 +9,11 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -41,17 +37,46 @@ public class AuthController {
         String username = request.getUsername();
         String password = request.getPassword();
 
-        // Demo credentials bypass
-        if (("admin".equals(username) && "admin123".equals(password)) ||
-            ("warden1".equals(username) && "warden123".equals(password)) ||
-            ("student1".equals(username) && "student123".equals(password)) ||
-            ("student2".equals(username) && "student123".equals(password)) ||
-            ("student3".equals(username) && "student123".equals(password))) {
-            String token = "demo-token-" + username;
-            return ResponseEntity.ok(new AuthResponse(token));
+        // Demo credentials with user data
+        if (("admin".equals(username) && "admin123".equals(password))) {
+            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
+            User demoUser = createDemoUser(username, "Admin", "User", "ADMIN");
+            return ResponseEntity.ok(new AuthResponse(token, demoUser));
+        } else if (("warden1".equals(username) && "warden123".equals(password)) ||
+                   ("warden".equals(username) && "warden123".equals(password))) {
+            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
+            User demoUser = createDemoUser(username, "John", "Warden", "WARDEN");
+            return ResponseEntity.ok(new AuthResponse(token, demoUser));
+        } else if (("student1".equals(username) && "student123".equals(password))) {
+            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
+            User demoUser = createDemoUser(username, "Alice", "Johnson", "STUDENT");
+            demoUser.setId(1L);
+            return ResponseEntity.ok(new AuthResponse(token, demoUser));
+        } else if (("student2".equals(username) && "student123".equals(password))) {
+            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
+            User demoUser = createDemoUser(username, "Bob", "Smith", "STUDENT");
+            demoUser.setId(2L);
+            return ResponseEntity.ok(new AuthResponse(token, demoUser));
+        } else if (("student3".equals(username) && "student123".equals(password))) {
+            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
+            User demoUser = createDemoUser(username, "Carol", "Williams", "STUDENT");
+            demoUser.setId(3L);
+            return ResponseEntity.ok(new AuthResponse(token, demoUser));
         }
 
-        return ResponseEntity.status(401).body("Invalid demo credentials");
+        return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
+    }
+
+    private User createDemoUser(String username, String firstName, String lastName, String role) {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(username + "@hostel.com");
+        user.setPhoneNumber("1234567890");
+        user.setRole(User.Role.valueOf(role));
+        return user;
     }
 
     @PostMapping("/register")

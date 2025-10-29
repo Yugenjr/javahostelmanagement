@@ -48,36 +48,34 @@ public class DataInitializer implements CommandLineRunner {
     private void createUsers() {
         // Create admin user
         if (userRepository.findByUsername("admin").isEmpty()) {
-            User admin = User.builder()
-                    .username("admin")
-                    .password(passwordEncoder.encode("admin123"))
-                    .firstName("System")
-                    .lastName("Administrator")
-                    .email("admin@hostel.com")
-                    .phoneNumber("9876543210")
-                    .role(User.Role.ADMIN)
-                    .address("Admin Office")
-                    .emergencyContact("9876543211")
-                    .active(true)
-                    .build();
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setFirstName("System");
+            admin.setLastName("Administrator");
+            admin.setEmail("admin@hostel.com");
+            admin.setPhoneNumber("9876543210");
+            admin.setRole(User.Role.ADMIN);
+            admin.setAddress("Admin Office");
+            admin.setEmergencyContact("9876543211");
+            admin.setActive(true);
             userRepository.save(admin);
             System.out.println("✅ Admin user created");
         }
 
         // Create warden user
         if (userRepository.findByUsername("warden1").isEmpty()) {
-            User warden = User.builder()
-                    .username("warden1")
-                    .password(passwordEncoder.encode("warden123"))
-                    .firstName("Jane")
-                    .lastName("Smith")
-                    .email("warden@hostel.com")
-                    .phoneNumber("9876543220")
-                    .role(User.Role.WARDEN)
-                    .address("Warden Quarters")
-                    .emergencyContact("9876543221")
-                    .active(true)
-                    .build();
+            User warden = new User();
+            warden.setUsername("warden1");
+            warden.setPassword(passwordEncoder.encode("warden123"));
+            warden.setFirstName("Jane");
+            warden.setLastName("Smith");
+            warden.setEmail("warden@hostel.com");
+            warden.setPhoneNumber("9876543220");
+            warden.setRole(User.Role.WARDEN);
+            warden.setAddress("Warden Quarters");
+            warden.setEmergencyContact("9876543221");
+            warden.setActive(true);
             userRepository.save(warden);
             System.out.println("✅ Warden user created");
         }

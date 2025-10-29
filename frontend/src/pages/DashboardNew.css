@@ -1,0 +1,223 @@
+.dashboard-container {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card {
+  height: 100%;
+  border-radius: 16px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  animation: scaleIn 0.5s ease-out;
+  animation-fill-mode: backwards;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.stat-card .MuiAvatar-root {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.chart-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease !important;
+  height: 100%;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.table-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease !important;
+  animation: slideUp 0.7s ease-out;
+}
+
+.table-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.table-card .MuiTableRow-root:hover {
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+.table-card .MuiTableCell-head {
+  font-weight: 700;
+  background-color: #f8f9fa;
+  color: #667eea;
+}
+
+.table-card .MuiTableCell-root {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.quick-stats-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  animation: slideUp 0.8s ease-out;
+}
+
+.quick-stats-card .MuiTypography-root {
+  color: white !important;
+}
+
+.quick-stats-card .MuiLinearProgress-root {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .stat-card {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    padding: 16px;
+  }
+
+  .dashboard-header h4 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Chip Styles */
+.MuiChip-root {
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+}
+
+.MuiChip-colorWarning {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+}
+
+.MuiChip-colorSuccess {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+}
+
+.MuiChip-colorError {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+}
+
+.MuiChip-colorInfo {
+  background-color: #d1ecf1 !important;
+  color: #0c5460 !important;
+}
+
+/* Tooltip Styles */
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.recharts-default-tooltip {
+  background-color: white !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 12px !important;
+}
+
+/* Loading Animation */
+.MuiCircularProgress-root {
+  color: #667eea !important;
+}
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
