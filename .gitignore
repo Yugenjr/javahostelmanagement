@@ -1,214 +1,75 @@
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+# Node modules
+**/node_modules/
+node_modules/
+frontend/node_modules/
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Windows shortcuts
-*.lnk
-
-# Application specific
-application-local.properties
-application-dev.properties
-
-# Frontend build
-frontend/build/
-frontend/dist/
-
-# Package lock files (optional - comment out if you want to keep them)
-# package-lock.json
-# yarn.lock
-# Compiled class files
+# Build outputs
+/target/
+/frontend/build/
+/build/
 *.class
 
-# Log files
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# Virtual machine crash logs
-hs_err_pid*
-replay_pid*
-
-# Maven
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-# Gradle
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-# IntelliJ IDEA
+# IDE
 .idea/
-*.iws
 *.iml
-*.ipr
-
-# Eclipse
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-# VS Code
 .vscode/
+*.swp
+*.swo
+*~
+.DS_Store
 
-# Node.js and npm
-node_modules/
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+hs_err_pid*.log
+replay_pid*.log
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Grunt intermediate storage
-.grunt
-
-# Bower dependency directory
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release
-
-# Dependency directories
-jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional stylelint cache
-.stylelintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
+# Environment variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# parcel-bundler cache
-.cache
-.parcel-cache
+# Compiled files (but keep source files)
+*.class
+*.jar
+*.war
+*.ear
 
-# Next.js build output
-.next
-out
+# Test coverage
+coverage/
+.nyc_output/
 
-# Nuxt.js build / generate output
-.nuxt
-dist
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.pid
+*.seed
+*.pid.lock
 
-# Gatsby files
-.cache/
-public
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
 
-# Storybook build outputs
-.out
-.storybook-out
+# Database
+*.db
+*.sqlite
+*.sqlite3
 
-# Temporary folders
-tmp/
-temp/
+# Uploads
+uploads/
+static/uploads/
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# But DON'T ignore these important files:
+!mvnw
+!mvnw.cmd
+!package-lock.json
+!pom.xml
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
 

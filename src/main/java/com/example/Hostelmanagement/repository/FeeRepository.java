@@ -16,12 +16,14 @@ public interface FeeRepository extends JpaRepository<Fee, Long> {
 
     List<Fee> findByPaymentStatus(Fee.PaymentStatus status);
 
+    long countByPaymentStatus(Fee.PaymentStatus status);
+
     @Query("SELECT f FROM Fee f WHERE f.year = :year AND f.month = :month")
     List<Fee> findByMonthAndYear(@Param("month") Integer month, @Param("year") Integer year);
 
     @Query("SELECT SUM(f.amount) FROM Fee f WHERE f.paymentStatus = 'PAID'")
     Double sumCollectedFees();
 
-    long countByPaymentStatus(Fee.PaymentStatus paymentStatus);
+    // Removed duplicate countByPaymentStatus declaration
 }
 

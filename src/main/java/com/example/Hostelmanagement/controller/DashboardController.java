@@ -41,6 +41,7 @@ public class DashboardController {
         // User stats
         long totalUsers = userRepository.count();
         long totalStudents = userRepository.countByRole(User.Role.STUDENT);
+        long totalWardens = userRepository.countByRole(User.Role.WARDEN);
 
         // Room stats
         long totalRooms = roomRepository.count();
@@ -57,8 +58,15 @@ public class DashboardController {
         long paidFees = feeRepository.countByPaymentStatus(Fee.PaymentStatus.PAID);
         long pendingFees = feeRepository.countByPaymentStatus(Fee.PaymentStatus.PENDING);
 
+        // Calculate total fees collected
+        BigDecimal totalFeesCollected = feeRepository.findByPaymentStatus(Fee.PaymentStatus.PAID)
+                .stream()
+                .map(Fee::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         stats.put("totalUsers", totalUsers);
         stats.put("totalStudents", totalStudents);
+        stats.put("totalWardens", totalWardens);
         stats.put("totalRooms", totalRooms);
         stats.put("availableRooms", availableRooms);
         stats.put("occupiedRooms", occupiedRooms);
@@ -68,6 +76,7 @@ public class DashboardController {
         stats.put("totalFees", totalFees);
         stats.put("paidFees", paidFees);
         stats.put("pendingFees", pendingFees);
+        stats.put("totalFeesCollected", totalFeesCollected);
 
         return ResponseEntity.ok(stats);
     }

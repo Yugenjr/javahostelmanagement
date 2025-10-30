@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
+    long countByRole(User.Role role);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
@@ -29,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.role = :role AND u.active = true")
     List<User> findActiveUsersByRole(@Param("role") User.Role role);
 
-    long countByRole(User.Role role);
+    // Removed duplicate countByRole declaration
 
     @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND u.room IS NULL")
     List<User> findStudentsWithoutRoom();
