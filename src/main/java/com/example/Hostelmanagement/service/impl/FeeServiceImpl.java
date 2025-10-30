@@ -39,6 +39,11 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
+    public List<Fee> findAll() {
+        return feeRepository.findAll();
+    }
+
+    @Override
     public Optional<Fee> findById(Long id) {
         return feeRepository.findById(id);
     }

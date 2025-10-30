@@ -10,6 +10,7 @@ public interface FeeService {
     Fee create(Fee fee);
     Fee recordPayment(Long id, String transactionId);
     List<Fee> findByStudent(User student);
+    List<Fee> findAll();
     Optional<Fee> findById(Long id);
 }
 

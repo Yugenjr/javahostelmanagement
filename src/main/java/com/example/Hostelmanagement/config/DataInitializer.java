@@ -7,9 +7,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -26,220 +28,215 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private FeeRepository feeRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("🚀 Initializing Database with Mock Data...");
+        // Check if data already exists
+        if (userRepository.count() > 3) {
+            System.out.println("Database already has users. Skipping sample data initialization.");
+            System.out.println("Existing users: " + userRepository.count());
+            return;
+        }
 
-        createUsers();
-        createRooms();
-        createComplaints();
-        createFees();
+        System.out.println("Initializing database with sample data...");
 
-        System.out.println("✅ Database initialization completed!");
-        System.out.println("📋 Demo Credentials:");
-        System.out.println("   Admin: admin / admin123");
-        System.out.println("   Warden: warden1 / warden123");
-        System.out.println("   Students: student1, student2, student3 / student123");
+        // Create Students
+        User student1 = createStudent("student1", "student123", "Alice", "Johnson", "alice@student.com", "9876543210");
+        User student2 = createStudent("student2", "student123", "Bob", "Smith", "bob@student.com", "9876543211");
+        User student3 = createStudent("student3", "student123", "Carol", "Williams", "carol@student.com", "9876543212");
+        User student4 = createStudent("student4", "student123", "David", "Brown", "david@student.com", "9876543213");
+        User student5 = createStudent("student5", "student123", "Emma", "Davis", "emma@student.com", "9876543214");
+
+        List<User> students = Arrays.asList(student1, student2, student3, student4, student5);
+        userRepository.saveAll(students);
+        System.out.println("Created 5 students");
+
+        // Create Warden
+        User warden = createWarden("warden1", "warden123", "John", "Warden", "warden@hostel.com", "9876543220");
+        userRepository.save(warden);
+        System.out.println("Created warden");
+
+        // Create Admin
+        User admin = createAdmin("admin", "admin123", "Admin", "User", "admin@hostel.com", "9876543230");
+        userRepository.save(admin);
+        System.out.println("Created admin");
+
+        // Create Rooms
+        List<Room> rooms = Arrays.asList(
+            createRoom("A101", Room.RoomType.SINGLE, 1, 1, 5000.0, Room.RoomStatus.OCCUPIED),
+            createRoom("A102", Room.RoomType.DOUBLE, 2, 1, 4000.0, Room.RoomStatus.OCCUPIED),
+            createRoom("A103", Room.RoomType.TRIPLE, 3, 1, 3500.0, Room.RoomStatus.OCCUPIED),
+            createRoom("A104", Room.RoomType.DOUBLE, 2, 1, 4000.0, Room.RoomStatus.AVAILABLE),
+            createRoom("B101", Room.RoomType.SINGLE, 1, 2, 5500.0, Room.RoomStatus.OCCUPIED),
+            createRoom("B102", Room.RoomType.DOUBLE, 2, 2, 4200.0, Room.RoomStatus.AVAILABLE),
+            createRoom("B103", Room.RoomType.TRIPLE, 3, 2, 3700.0, Room.RoomStatus.AVAILABLE),
+            createRoom("C101", Room.RoomType.SINGLE, 1, 3, 5200.0, Room.RoomStatus.MAINTENANCE)
+        );
+        roomRepository.saveAll(rooms);
+        System.out.println("Created 8 rooms");
+
+        // Assign rooms to students
+        student1.setRoom(rooms.get(0));
+        student2.setRoom(rooms.get(1));
+        student3.setRoom(rooms.get(1));
+        student4.setRoom(rooms.get(2));
+        student5.setRoom(rooms.get(4));
+        userRepository.saveAll(students);
+        System.out.println("Assigned rooms to students");
+
+        // Create Complaints
+        List<Complaint> complaints = Arrays.asList(
+            createComplaint(student1, "WiFi Not Working", "Internet connection is very slow in my room",
+                Complaint.ComplaintType.INTERNET, Complaint.Priority.HIGH, Complaint.ComplaintStatus.IN_PROGRESS),
+            createComplaint(student2, "AC Not Cooling", "Air conditioner is not working properly",
+                Complaint.ComplaintType.ELECTRICAL, Complaint.Priority.MEDIUM, Complaint.ComplaintStatus.PENDING),
+            createComplaint(student3, "Water Leakage", "Water is leaking from bathroom ceiling",
+                Complaint.ComplaintType.PLUMBING, Complaint.Priority.HIGH, Complaint.ComplaintStatus.PENDING),
+            createComplaint(student4, "Furniture Broken", "Study table is broken",
+                Complaint.ComplaintType.FURNITURE, Complaint.Priority.LOW, Complaint.ComplaintStatus.RESOLVED),
+            createComplaint(student5, "Room Cleaning", "Room needs thorough cleaning",
+                Complaint.ComplaintType.CLEANING, Complaint.Priority.MEDIUM, Complaint.ComplaintStatus.RESOLVED),
+            createComplaint(student1, "Lights Not Working", "Tube light is flickering",
+                Complaint.ComplaintType.ELECTRICAL, Complaint.Priority.MEDIUM, Complaint.ComplaintStatus.IN_PROGRESS)
+        );
+        complaintRepository.saveAll(complaints);
+        System.out.println("Created 6 complaints");
+
+        // Create Fee Records
+        List<Fee> fees = Arrays.asList(
+            createFee(student1, 5000.0, "HOSTEL_FEE", 10, 2025, Fee.PaymentStatus.PAID, "TXN123456"),
+            createFee(student1, 5000.0, "HOSTEL_FEE", 11, 2025, Fee.PaymentStatus.PENDING, null),
+            createFee(student2, 4000.0, "HOSTEL_FEE", 10, 2025, Fee.PaymentStatus.PAID, "TXN123457"),
+            createFee(student2, 4000.0, "HOSTEL_FEE", 11, 2025, Fee.PaymentStatus.PENDING, null),
+            createFee(student3, 4000.0, "HOSTEL_FEE", 10, 2025, Fee.PaymentStatus.OVERDUE, null),
+            createFee(student3, 4000.0, "HOSTEL_FEE", 11, 2025, Fee.PaymentStatus.PENDING, null),
+            createFee(student4, 3500.0, "HOSTEL_FEE", 10, 2025, Fee.PaymentStatus.PAID, "TXN123458"),
+            createFee(student4, 3500.0, "HOSTEL_FEE", 11, 2025, Fee.PaymentStatus.PENDING, null),
+            createFee(student5, 5500.0, "HOSTEL_FEE", 10, 2025, Fee.PaymentStatus.PAID, "TXN123459"),
+            createFee(student5, 5500.0, "HOSTEL_FEE", 11, 2025, Fee.PaymentStatus.PENDING, null),
+            createFee(student1, 500.0, "MAINTENANCE_FEE", 10, 2025, Fee.PaymentStatus.PAID, "TXN123460"),
+            createFee(student2, 500.0, "MAINTENANCE_FEE", 10, 2025, Fee.PaymentStatus.PENDING, null)
+        );
+        feeRepository.saveAll(fees);
+        System.out.println("Created 12 fee records");
+
+        System.out.println("Database initialization complete!");
+        System.out.println("Sample users:");
+        System.out.println("  Admin: admin / admin123");
+        System.out.println("  Warden: warden1 / warden123");
+        System.out.println("  Students: student1-student5 / student123");
     }
 
-    private void createUsers() {
-        // Create admin user
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setFirstName("System");
-            admin.setLastName("Administrator");
-            admin.setEmail("admin@hostel.com");
-            admin.setPhoneNumber("9876543210");
-            admin.setRole(User.Role.ADMIN);
-            admin.setAddress("Admin Office");
-            admin.setEmergencyContact("9876543211");
-            admin.setActive(true);
-            userRepository.save(admin);
-            System.out.println("✅ Admin user created");
-        }
-
-        // Create warden user
-        if (userRepository.findByUsername("warden1").isEmpty()) {
-            User warden = new User();
-            warden.setUsername("warden1");
-            warden.setPassword(passwordEncoder.encode("warden123"));
-            warden.setFirstName("Jane");
-            warden.setLastName("Smith");
-            warden.setEmail("warden@hostel.com");
-            warden.setPhoneNumber("9876543220");
-            warden.setRole(User.Role.WARDEN);
-            warden.setAddress("Warden Quarters");
-            warden.setEmergencyContact("9876543221");
-            warden.setActive(true);
-            userRepository.save(warden);
-            System.out.println("✅ Warden user created");
-        }
-
-        // Create sample students
-        String[] studentData = {
-            "student1,John,Doe,john.doe@student.com,9876543212",
-            "student2,Alice,Johnson,alice.johnson@student.com,9876543213",
-            "student3,Bob,Wilson,bob.wilson@student.com,9876543214"
-        };
-
-        for (String data : studentData) {
-            String[] parts = data.split(",");
-            if (userRepository.findByUsername(parts[0]).isEmpty()) {
-                User student = new User();
-                student.setUsername(parts[0]);
-                student.setPassword(passwordEncoder.encode("student123"));
-                student.setFirstName(parts[1]);
-                student.setLastName(parts[2]);
-                student.setEmail(parts[3]);
-                student.setPhoneNumber(parts[4]);
-                student.setRole(User.Role.STUDENT);
-                student.setAddress("Student Address " + parts[0]);
-                student.setEmergencyContact("9876543299");
-                userRepository.save(student);
-            }
-        }
-        System.out.println("✅ Student users created");
+    private User createStudent(String username, String password, String firstName, String lastName, String email, String phone) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder != null ? passwordEncoder.encode(password) : password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPhoneNumber(phone);
+        user.setRole(User.Role.STUDENT);
+        user.setActive(true);
+        user.setAddress("123 Student St, City");
+        user.setEmergencyContact("Emergency: " + phone);
+        return user;
     }
 
-    private void createRooms() {
-        if (roomRepository.count() == 0) {
-            // Create rooms for different floors and types
-            for (int floor = 1; floor <= 3; floor++) {
-                for (int roomNum = 1; roomNum <= 10; roomNum++) {
-                    Room room = new Room();
-                    room.setRoomNumber(floor + String.format("%02d", roomNum));
-                    room.setFloor(floor);
-                    room.setRoomType(roomNum <= 5 ? Room.RoomType.SINGLE : Room.RoomType.DOUBLE);
-                    room.setCapacity(roomNum <= 5 ? 1 : 2);
-                    room.setStatus(Room.RoomStatus.AVAILABLE);
-                    room.setMonthlyRent(roomNum <= 5 ? new BigDecimal("5000") : new BigDecimal("7000"));
-                    room.setDescription("Room " + room.getRoomNumber() + " on floor " + floor);
-                    roomRepository.save(room);
-                }
-            }
-
-            // Allocate some rooms to students
-            User student1 = userRepository.findByUsername("student1").orElse(null);
-            User student2 = userRepository.findByUsername("student2").orElse(null);
-
-            if (student1 != null) {
-                Room room101 = roomRepository.findByRoomNumber("101").orElse(null);
-                if (room101 != null) {
-                    room101.setStatus(Room.RoomStatus.OCCUPIED);
-                    room101.setStudent(student1);
-                    roomRepository.save(room101);
-                }
-            }
-
-            if (student2 != null) {
-                Room room201 = roomRepository.findByRoomNumber("201").orElse(null);
-                if (room201 != null) {
-                    room201.setStatus(Room.RoomStatus.OCCUPIED);
-                    room201.setStudent(student2);
-                    roomRepository.save(room201);
-                }
-            }
-
-            System.out.println("✅ Sample rooms created (30 rooms across 3 floors)");
-        }
+    private User createWarden(String username, String password, String firstName, String lastName, String email, String phone) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder != null ? passwordEncoder.encode(password) : password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPhoneNumber(phone);
+        user.setRole(User.Role.WARDEN);
+        user.setActive(true);
+        user.setAddress("456 Warden Ave, City");
+        user.setEmergencyContact("Emergency: " + phone);
+        return user;
     }
 
-    private void createComplaints() {
-        if (complaintRepository.count() == 0) {
-            User student1 = userRepository.findByUsername("student1").orElse(null);
-            User student2 = userRepository.findByUsername("student2").orElse(null);
-
-            if (student1 != null) {
-                Complaint complaint1 = new Complaint();
-                complaint1.setTitle("Air Conditioning Not Working");
-                complaint1.setDescription("The AC in room 101 has been making strange noises and not cooling properly for the past 2 days.");
-                complaint1.setType(Complaint.ComplaintType.ELECTRICAL);
-                complaint1.setPriority(Complaint.Priority.HIGH);
-                complaint1.setStatus(Complaint.ComplaintStatus.PENDING);
-                complaint1.setStudent(student1);
-                complaintRepository.save(complaint1);
-
-                Complaint complaint2 = new Complaint();
-                complaint2.setTitle("WiFi Connection Issues");
-                complaint2.setDescription("Internet connection is very slow in room 101, making it difficult to attend online classes.");
-                complaint2.setType(Complaint.ComplaintType.INTERNET);
-                complaint2.setPriority(Complaint.Priority.MEDIUM);
-                complaint2.setStatus(Complaint.ComplaintStatus.IN_PROGRESS);
-                complaint2.setStudent(student1);
-                complaintRepository.save(complaint2);
-            }
-
-            if (student2 != null) {
-                Complaint complaint3 = new Complaint();
-                complaint3.setTitle("Water Leakage");
-                complaint3.setDescription("There is water leakage from the bathroom ceiling in room 201.");
-                complaint3.setType(Complaint.ComplaintType.PLUMBING);
-                complaint3.setPriority(Complaint.Priority.HIGH);
-                complaint3.setStatus(Complaint.ComplaintStatus.RESOLVED);
-                complaint3.setStudent(student2);
-                complaint3.setResolvedAt(LocalDateTime.now().minusDays(1));
-                complaint3.setWardenRemarks("Plumber fixed the pipe and ceiling has been repaired.");
-                complaintRepository.save(complaint3);
-            }
-
-            System.out.println("✅ Sample complaints created");
-        }
+    private User createAdmin(String username, String password, String firstName, String lastName, String email, String phone) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder != null ? passwordEncoder.encode(password) : password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPhoneNumber(phone);
+        user.setRole(User.Role.ADMIN);
+        user.setActive(true);
+        user.setAddress("789 Admin Rd, City");
+        user.setEmergencyContact("Emergency: " + phone);
+        return user;
     }
 
-    private void createFees() {
-        if (feeRepository.count() == 0) {
-            User student1 = userRepository.findByUsername("student1").orElse(null);
-            User student2 = userRepository.findByUsername("student2").orElse(null);
+    private Room createRoom(String roomNumber, Room.RoomType type, int capacity, int floor, double rent, Room.RoomStatus status) {
+        Room room = new Room();
+        room.setRoomNumber(roomNumber);
+        room.setRoomType(type);
+        room.setCapacity(capacity);
+        room.setFloor(floor);
+        room.setMonthlyRent(BigDecimal.valueOf(rent));
+        room.setStatus(status);
+        room.setDescription("Well-furnished " + type.name().toLowerCase() + " room");
+        room.setAmenities("AC, WiFi, Study Table, Wardrobe, Attached Bathroom");
+        return room;
+    }
 
-            if (student1 != null) {
-                // Paid fee
-                Fee fee1 = new Fee();
-                fee1.setStudent(student1);
-                fee1.setFeeType(Fee.FeeType.HOSTEL_FEE);
-                fee1.setAmount(new BigDecimal("5000.00"));
-                fee1.setDueDate(LocalDate.now().minusDays(30));
-                fee1.setPaidDate(LocalDate.now().minusDays(25));
-                fee1.setPaymentStatus(Fee.PaymentStatus.PAID);
-                fee1.setPaymentMethod(Fee.PaymentMethod.ONLINE);
-                fee1.setTransactionId("TXN123456789");
-                fee1.setMonth(LocalDate.now().minusMonths(1).getMonthValue());
-                fee1.setYear(LocalDate.now().getYear());
-                fee1.setRemarks("Monthly hostel fee for October");
-                feeRepository.save(fee1);
+    private Complaint createComplaint(User student, String title, String description,
+                                     Complaint.ComplaintType type, Complaint.Priority priority,
+                                     Complaint.ComplaintStatus status) {
+        Complaint complaint = new Complaint();
+        complaint.setStudent(student);
+        complaint.setTitle(title);
+        complaint.setDescription(description);
+        complaint.setType(type);
+        complaint.setPriority(priority);
+        complaint.setStatus(status);
+        complaint.setCreatedAt(LocalDateTime.now().minusDays((long)(Math.random() * 10)));
 
-                // Pending fee
-                Fee fee2 = new Fee();
-                fee2.setStudent(student1);
-                fee2.setFeeType(Fee.FeeType.HOSTEL_FEE);
-                fee2.setAmount(new BigDecimal("5000.00"));
-                fee2.setDueDate(LocalDate.now().plusDays(15));
-                fee2.setPaymentStatus(Fee.PaymentStatus.PENDING);
-                fee2.setMonth(LocalDate.now().getMonthValue());
-                fee2.setYear(LocalDate.now().getYear());
-                fee2.setRemarks("Monthly hostel fee for November");
-                feeRepository.save(fee2);
-            }
-
-            if (student2 != null) {
-                // Overdue fee
-                Fee fee3 = new Fee();
-                fee3.setStudent(student2);
-                fee3.setFeeType(Fee.FeeType.SECURITY_DEPOSIT);
-                fee3.setAmount(new BigDecimal("10000.00"));
-                fee3.setDueDate(LocalDate.now().minusDays(10));
-                fee3.setPaymentStatus(Fee.PaymentStatus.OVERDUE);
-                fee3.setMonth(LocalDate.now().getMonthValue());
-                fee3.setYear(LocalDate.now().getYear());
-                fee3.setRemarks("Security deposit for room allocation");
-                feeRepository.save(fee3);
-            }
-
-            System.out.println("✅ Sample fees created");
+        if (status == Complaint.ComplaintStatus.RESOLVED) {
+            complaint.setWardenRemarks("Issue has been resolved successfully");
+            complaint.setResolvedAt(LocalDateTime.now().minusDays((long)(Math.random() * 5)));
+            complaint.setUpdatedAt(LocalDateTime.now().minusDays((long)(Math.random() * 5)));
+        } else if (status == Complaint.ComplaintStatus.IN_PROGRESS) {
+            complaint.setWardenRemarks("Working on it");
+            complaint.setUpdatedAt(LocalDateTime.now().minusDays((long)(Math.random() * 3)));
         }
+
+        return complaint;
+    }
+
+    private Fee createFee(User student, double amount, String feeType, int month, int year,
+                         Fee.PaymentStatus status, String transactionId) {
+        Fee fee = new Fee();
+        fee.setStudent(student);
+        fee.setAmount(BigDecimal.valueOf(amount));
+
+        // Convert string to FeeType enum
+        Fee.FeeType type = Fee.FeeType.HOSTEL_FEE;
+        if ("MAINTENANCE_FEE".equals(feeType)) {
+            type = Fee.FeeType.MAINTENANCE_FEE;
+        } else if ("MESS_FEE".equals(feeType)) {
+            type = Fee.FeeType.MESS_FEE;
+        }
+        fee.setFeeType(type);
+
+        fee.setMonth(month);
+        fee.setYear(year);
+        fee.setDueDate(LocalDate.of(year, month, 10));
+        fee.setPaymentStatus(status);
+        fee.setTransactionId(transactionId);
+
+        if (status == Fee.PaymentStatus.PAID) {
+            fee.setPaidDate(LocalDate.of(year, month, 5));
+        }
+
+        return fee;
     }
 }
+

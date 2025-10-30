@@ -31,6 +31,15 @@ public class FeeController {
         return ResponseEntity.ok(FeeDto.fromEntity(createdFee));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARDEN')")
+    public ResponseEntity<List<FeeDto>> getAllFees() {
+        List<FeeDto> fees = feeService.findAll().stream()
+                .map(FeeDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(fees);
+    }
+
     @PostMapping("/{id}/pay")
     public ResponseEntity<FeeDto> pay(@PathVariable Long id, @RequestParam String transactionId) {
         Fee paidFee = feeService.recordPayment(id, transactionId);

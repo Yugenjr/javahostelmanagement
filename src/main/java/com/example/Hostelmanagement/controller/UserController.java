@@ -22,11 +22,25 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
-        List<UserSummaryDto> users = userRepository.findAll().stream()
-                .map(UserSummaryDto::fromEntity)
-                .collect(Collectors.toList());
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARDEN')")
+    public ResponseEntity<List<UserSummaryDto>> getAllUsers(@RequestParam(required = false) String role) {
+        List<UserSummaryDto> users;
+        if (role != null && !role.isEmpty()) {
+            try {
+                User.Role userRole = User.Role.valueOf(role.toUpperCase());
+                users = userRepository.findByRole(userRole).stream()
+                        .map(UserSummaryDto::fromEntity)
+                        .collect(Collectors.toList());
+            } catch (IllegalArgumentException e) {
+                users = userRepository.findAll().stream()
+                        .map(UserSummaryDto::fromEntity)
+                        .collect(Collectors.toList());
+            }
+        } else {
+            users = userRepository.findAll().stream()
+                    .map(UserSummaryDto::fromEntity)
+                    .collect(Collectors.toList());
+        }
         return ResponseEntity.ok(users);
     }
 
@@ -47,7 +61,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARDEN')")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody User user) {
         Optional<User> existing = userRepository.findById(id);
         if (existing.isEmpty()) {
@@ -66,7 +80,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARDEN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userRepository.deleteById(id);
         return ResponseEntity.ok().build();

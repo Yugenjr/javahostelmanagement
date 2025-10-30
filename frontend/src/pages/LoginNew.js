@@ -200,6 +200,16 @@ const LoginPage = () => {
     <div className="login-container">
       <div className="login-background">
         <div className="animated-bg"></div>
+        <div className="stars">
+          {[...Array(50)].map((_, i) => (
+            <div key={i} className="star" style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 3}s`
+            }}></div>
+          ))}
+        </div>
         <div className="floating-shapes">
           <div className="shape shape-1"></div>
           <div className="shape shape-2"></div>

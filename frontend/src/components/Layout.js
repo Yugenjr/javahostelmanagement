@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const menuItems = [
     { path: '/dashboard', icon: '📊', label: 'Dashboard', color: '#667eea' },
@@ -48,8 +50,23 @@ const Layout = ({ children }) => {
           {menuItems.map((item) => (
             <button
               key={item.path}
-              className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-              onClick={() => navigate(item.path)}
+              className={`nav-item ${location.pathname === item.path || (item.path === '/settings' && location.pathname.includes('settings')) ? 'active' : ''}`}
+              onClick={() => {
+                if (item.path === '/settings') {
+                  // Navigate to role-specific settings
+                  if (user?.role === 'ADMIN') {
+                    navigate('/admin-settings');
+                  } else if (user?.role === 'STUDENT') {
+                    navigate('/student-settings');
+                  } else if (user?.role === 'WARDEN') {
+                    navigate('/warden-settings');
+                  } else {
+                    navigate('/settings');
+                  }
+                } else {
+                  navigate(item.path);
+                }
+              }}
               style={{ '--item-color': item.color }}
             >
               <span className="nav-icon">{item.icon}</span>
