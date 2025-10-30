@@ -103,10 +103,6 @@
   z-index: -2;
   animation: pulseGlow 2s ease-in-out infinite;
 }
-  border: 2px solid transparent;
-  position: relative;
-  overflow: visible;
-}
 
 .login-form .MuiOutlinedInput-root::before {
   content: '';
