@@ -35,6 +35,9 @@ import {
   Payment,
   TrendingUp,
   AccountBalance,
+  Add,
+  Edit,
+  Delete,
 } from '@mui/icons-material';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -65,14 +68,29 @@ const PaymentsPage = () => {
   const [fees, setFees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openPayDialog, setOpenPayDialog] = useState(false);
+  const [openFeeDialog, setOpenFeeDialog] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
+  const [editingFee, setEditingFee] = useState(null);
+  const [students, setStudents] = useState([]);
   const [paymentData, setPaymentData] = useState({
     paymentMethod: 'UPI',
     transactionId: '',
   });
+  const [feeFormData, setFeeFormData] = useState({
+    studentId: '',
+    amount: '',
+    feeType: 'HOSTEL_FEE',
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    dueDate: '',
+    description: '',
+  });
 
   useEffect(() => {
     fetchFees();
+    if (!isStudent) {
+      fetchStudents();
+    }
   }, []);
 
   const fetchFees = async () => {
@@ -111,6 +129,87 @@ const PaymentsPage = () => {
     toast.info(`Showing ${mockFees.length} sample fee records`);
   };
 
+  const fetchStudents = async () => {
+    try {
+      const response = await api.get('/api/users?role=STUDENT');
+      setStudents(response.data);
+    } catch (error) {
+      console.error('Failed to fetch students:', error);
+    }
+  };
+
+  const handleOpenFeeDialog = (fee = null) => {
+    if (fee) {
+      setEditingFee(fee);
+      setFeeFormData({
+        studentId: fee.student?.id || '',
+        amount: fee.amount,
+        feeType: fee.feeType,
+        month: fee.month,
+        year: fee.year,
+        dueDate: fee.dueDate,
+        description: fee.description || '',
+      });
+    } else {
+      setEditingFee(null);
+      setFeeFormData({
+        studentId: '',
+        amount: '',
+        feeType: 'HOSTEL_FEE',
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+        dueDate: '',
+        description: '',
+      });
+    }
+    setOpenFeeDialog(true);
+  };
+
+  const handleFeeFormChange = (e) => {
+    setFeeFormData({ ...feeFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmitFee = async () => {
+    try {
+      const feeData = {
+        student: { id: feeFormData.studentId },
+        amount: parseFloat(feeFormData.amount),
+        feeType: feeFormData.feeType,
+        month: parseInt(feeFormData.month),
+        year: parseInt(feeFormData.year),
+        dueDate: feeFormData.dueDate,
+        description: feeFormData.description,
+        paymentStatus: 'PENDING',
+      };
+
+      if (editingFee) {
+        await api.put(`/api/fees/${editingFee.id}`, feeData);
+        toast.success('Fee updated successfully!');
+      } else {
+        await api.post('/api/fees', feeData);
+        toast.success('Fee created successfully!');
+      }
+      fetchFees();
+      setOpenFeeDialog(false);
+    } catch (error) {
+      console.error('Fee submission error:', error);
+      toast.error(editingFee ? 'Failed to update fee' : 'Failed to create fee');
+    }
+  };
+
+  const handleDeleteFee = async (id) => {
+    if (window.confirm('Are you sure you want to delete this fee record?')) {
+      try {
+        await api.delete(`/api/fees/${id}`);
+        toast.success('Fee deleted successfully!');
+        fetchFees();
+      } catch (error) {
+        console.error('Delete error:', error);
+        toast.error('Failed to delete fee');
+      }
+    }
+  };
+
   const handleOpenPayDialog = (fee) => {
     setSelectedFee(fee);
     setPaymentData({
@@ -122,14 +221,16 @@ const PaymentsPage = () => {
 
   const handlePaymentSubmit = async () => {
     try {
-      await api.put(`/api/fees/${selectedFee.id}/pay`, {
-        ...paymentData,
+      await api.post(`/api/fees/${selectedFee.id}/pay`, {
+        transactionId: paymentData.transactionId,
+        paymentMethod: paymentData.paymentMethod,
         paidDate: new Date().toISOString().split('T')[0],
       });
       toast.success('Payment recorded successfully!');
       fetchFees();
       setOpenPayDialog(false);
     } catch (error) {
+      console.error('Payment error:', error);
       toast.error('Failed to record payment');
     }
   };
@@ -215,6 +316,21 @@ const PaymentsPage = () => {
             Track and manage hostel fee payments
           </Typography>
         </Box>
+        {!isStudent && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => handleOpenFeeDialog()}
+            sx={{
+              background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
+              borderRadius: 2,
+              px: 3,
+              py: 1.5,
+            }}
+          >
+            Add Fee
+          </Button>
+        )}
       </Paper>
 
       {/* Statistics Cards */}
@@ -430,6 +546,28 @@ const PaymentsPage = () => {
                             </IconButton>
                           </Tooltip>
                         )}
+                        {!isStudent && (
+                          <>
+                            <Tooltip title="Edit Fee">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => handleOpenFeeDialog(fee)}
+                              >
+                                <Edit />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete Fee">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteFee(fee.id)}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -498,6 +636,120 @@ const PaymentsPage = () => {
             startIcon={<Payment />}
           >
             Confirm Payment
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add/Edit Fee Dialog */}
+      <Dialog open={openFeeDialog} onClose={() => setOpenFeeDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          {editingFee ? 'Edit Fee Record' : 'Add New Fee'}
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                select
+                label="Student"
+                name="studentId"
+                value={feeFormData.studentId}
+                onChange={handleFeeFormChange}
+                required
+              >
+                <MenuItem value="">Select Student</MenuItem>
+                {students.map((student) => (
+                  <MenuItem key={student.id} value={student.id}>
+                    {student.firstName} {student.lastName} - {student.username}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Amount (₹)"
+                name="amount"
+                value={feeFormData.amount}
+                onChange={handleFeeFormChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                select
+                label="Fee Type"
+                name="feeType"
+                value={feeFormData.feeType}
+                onChange={handleFeeFormChange}
+                required
+              >
+                <MenuItem value="HOSTEL_FEE">Hostel Fee</MenuItem>
+                <MenuItem value="MESS_FEE">Mess Fee</MenuItem>
+                <MenuItem value="MAINTENANCE_FEE">Maintenance Fee</MenuItem>
+                <MenuItem value="SECURITY_DEPOSIT">Security Deposit</MenuItem>
+                <MenuItem value="OTHER">Other</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Month"
+                name="month"
+                value={feeFormData.month}
+                onChange={handleFeeFormChange}
+                required
+                inputProps={{ min: 1, max: 12 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Year"
+                name="year"
+                value={feeFormData.year}
+                onChange={handleFeeFormChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Due Date"
+                name="dueDate"
+                value={feeFormData.dueDate}
+                onChange={handleFeeFormChange}
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Description (Optional)"
+                name="description"
+                value={feeFormData.description}
+                onChange={handleFeeFormChange}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenFeeDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitFee}
+            disabled={!feeFormData.studentId || !feeFormData.amount || !feeFormData.dueDate}
+          >
+            {editingFee ? 'Update Fee' : 'Create Fee'}
           </Button>
         </DialogActions>
       </Dialog>

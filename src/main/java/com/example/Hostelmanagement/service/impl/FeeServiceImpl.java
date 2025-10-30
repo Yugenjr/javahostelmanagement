@@ -23,6 +23,23 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
+    public Fee update(Long id, Fee fee) {
+        Optional<Fee> existing = feeRepository.findById(id);
+        if (existing.isEmpty()) throw new RuntimeException("Fee record not found");
+        Fee f = existing.get();
+        f.setAmount(fee.getAmount());
+        f.setFeeType(fee.getFeeType());
+        f.setMonth(fee.getMonth());
+        f.setYear(fee.getYear());
+        f.setDueDate(fee.getDueDate());
+        f.setDescription(fee.getDescription());
+        if (fee.getStudent() != null) {
+            f.setStudent(fee.getStudent());
+        }
+        return feeRepository.save(f);
+    }
+
+    @Override
     public Fee recordPayment(Long id, String transactionId) {
         Optional<Fee> existing = feeRepository.findById(id);
         if (existing.isEmpty()) throw new RuntimeException("Fee record not found");
@@ -46,6 +63,11 @@ public class FeeServiceImpl implements FeeService {
     @Override
     public Optional<Fee> findById(Long id) {
         return feeRepository.findById(id);
+    }
+
+    @Override
+    public void delete(Long id) {
+        feeRepository.deleteById(id);
     }
 }
 

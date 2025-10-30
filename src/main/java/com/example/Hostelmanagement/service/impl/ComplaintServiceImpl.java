@@ -22,6 +22,21 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public Complaint update(Long id, Complaint complaint) {
+        Optional<Complaint> existing = complaintRepository.findById(id);
+        if (existing.isEmpty()) throw new RuntimeException("Complaint not found");
+        Complaint c = existing.get();
+        c.setTitle(complaint.getTitle());
+        c.setDescription(complaint.getDescription());
+        c.setType(complaint.getType());
+        c.setPriority(complaint.getPriority());
+        if (complaint.getStudent() != null) {
+            c.setStudent(complaint.getStudent());
+        }
+        return complaintRepository.save(c);
+    }
+
+    @Override
     public Complaint updateStatus(Long id, Complaint.ComplaintStatus status, String wardenRemarks) {
         Optional<Complaint> existing = complaintRepository.findById(id);
         if (existing.isEmpty()) throw new RuntimeException("Complaint not found");
@@ -47,6 +62,11 @@ public class ComplaintServiceImpl implements ComplaintService {
     @Override
     public Optional<Complaint> findById(Long id) {
         return complaintRepository.findById(id);
+    }
+
+    @Override
+    public void delete(Long id) {
+        complaintRepository.deleteById(id);
     }
 }
 

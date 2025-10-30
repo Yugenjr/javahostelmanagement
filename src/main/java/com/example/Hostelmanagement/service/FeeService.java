@@ -8,9 +8,11 @@ import java.util.Optional;
 
 public interface FeeService {
     Fee create(Fee fee);
+    Fee update(Long id, Fee fee);
     Fee recordPayment(Long id, String transactionId);
     List<Fee> findByStudent(User student);
     List<Fee> findAll();
     Optional<Fee> findById(Long id);
+    void delete(Long id);
 }
 

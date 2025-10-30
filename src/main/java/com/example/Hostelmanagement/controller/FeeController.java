@@ -41,9 +41,23 @@ public class FeeController {
     }
 
     @PostMapping("/{id}/pay")
-    public ResponseEntity<FeeDto> pay(@PathVariable Long id, @RequestParam String transactionId) {
-        Fee paidFee = feeService.recordPayment(id, transactionId);
+    public ResponseEntity<FeeDto> pay(@PathVariable Long id, @RequestBody PaymentRequest request) {
+        Fee paidFee = feeService.recordPayment(id, request.getTransactionId());
         return ResponseEntity.ok(FeeDto.fromEntity(paidFee));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARDEN')")
+    public ResponseEntity<FeeDto> update(@PathVariable Long id, @Valid @RequestBody Fee fee) {
+        Fee updatedFee = feeService.update(id, fee);
+        return ResponseEntity.ok(FeeDto.fromEntity(updatedFee));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FeeDto> getById(@PathVariable Long id) {
+        return feeService.findById(id)
+                .map(fee -> ResponseEntity.ok(FeeDto.fromEntity(fee)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/student/{studentId}")
@@ -53,6 +67,44 @@ public class FeeController {
                 .map(FeeDto::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(fees);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        feeService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
+    // Payment request DTO
+    public static class PaymentRequest {
+        private String transactionId;
+        private String paymentMethod;
+        private String paidDate;
+
+        public String getTransactionId() {
+            return transactionId;
+        }
+
+        public void setTransactionId(String transactionId) {
+            this.transactionId = transactionId;
+        }
+
+        public String getPaymentMethod() {
+            return paymentMethod;
+        }
+
+        public void setPaymentMethod(String paymentMethod) {
+            this.paymentMethod = paymentMethod;
+        }
+
+        public String getPaidDate() {
+            return paidDate;
+        }
+
+        public void setPaidDate(String paidDate) {
+            this.paidDate = paidDate;
+        }
     }
 }
 
