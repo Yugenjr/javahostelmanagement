@@ -136,17 +136,64 @@ const StudentsPage = () => {
 
   const handleSubmit = async () => {
     try {
+      // Validate required fields
+      if (!formData.firstName || !formData.lastName || !formData.email) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      if (!editingStudent && !formData.username) {
+        toast.error('Username is required for new students');
+        return;
+      }
+
+      if (!editingStudent && !formData.password) {
+        toast.error('Password is required for new students');
+        return;
+      }
+
       if (editingStudent) {
-        await api.put(`/api/users/${editingStudent.id}`, formData);
+        // Update existing student
+        const updateData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          emergencyContact: formData.emergencyContact,
+          active: true,
+        };
+
+        console.log('Updating student:', editingStudent.id, updateData);
+        await api.put(`/api/users/${editingStudent.id}`, updateData);
         toast.success('Student updated successfully!');
       } else {
-        await api.post('/api/auth/register', { ...formData, role: 'STUDENT' });
+        // Add new student
+        const newStudentData = {
+          username: formData.username,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          emergencyContact: formData.emergencyContact,
+          role: 'STUDENT',
+          active: true,
+        };
+
+        console.log('Adding new student:', newStudentData);
+        await api.post('/api/auth/register', newStudentData);
         toast.success('Student added successfully!');
       }
+
       fetchStudents();
       handleCloseDialog();
     } catch (error) {
-      toast.error(editingStudent ? 'Failed to update student' : 'Failed to add student');
+      console.error('Error submitting student:', error);
+      const errorMessage = error.response?.data?.message ||
+                          (editingStudent ? 'Failed to update student' : 'Failed to add student');
+      toast.error(errorMessage);
     }
   };
 
@@ -488,6 +535,13 @@ const StudentsPage = () => {
           <Button
             variant="contained"
             onClick={handleSubmit}
+            disabled={
+              !formData.firstName ||
+              !formData.lastName ||
+              !formData.email ||
+              (!editingStudent && !formData.username) ||
+              (!editingStudent && !formData.password)
+            }
             sx={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}
           >
             {editingStudent ? 'Update' : 'Add'}

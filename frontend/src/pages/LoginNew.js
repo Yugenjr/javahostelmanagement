@@ -54,6 +54,7 @@ const LoginPage = () => {
     lastName: '',
     email: '',
     phoneNumber: '',
+    role: 'STUDENT',
   });
 
   const handleTabChange = (event, newValue) => {
@@ -164,7 +165,7 @@ const LoginPage = () => {
 
     try {
       const { confirmPassword, ...dataToSend } = registerData;
-      const result = await register({ ...dataToSend, role: 'STUDENT' });
+      const result = await register(dataToSend);
 
       if (result.success) {
         setSuccess('Registration successful! Please login with your credentials.');
@@ -178,6 +179,7 @@ const LoginPage = () => {
             lastName: '',
             email: '',
             phoneNumber: '',
+            role: 'STUDENT',
           });
         }, 2000);
       } else {
@@ -362,54 +364,77 @@ const LoginPage = () => {
                       {loading ? 'Signing in...' : 'Sign In'}
                     </Button>
 
-                    <Box className="demo-credentials">
-                      <Typography variant="caption" color="textSecondary" fontWeight={700} gutterBottom display="block">
-                        🎯 Quick Demo Access
+                    <Box className="demo-credentials" sx={{
+                      mt: 3,
+                      p: 2,
+                      bgcolor: 'rgba(103, 126, 234, 0.05)',
+                      borderRadius: 2,
+                      border: '1px solid rgba(103, 126, 234, 0.2)'
+                    }}>
+                      <Typography variant="body2" color="primary" fontWeight={700} gutterBottom display="block" textAlign="center">
+                        🎯 Demo Credentials - Click to Auto-Fill
                       </Typography>
-                      <Typography variant="caption" color="textSecondary" gutterBottom display="block" mb={1.5}>
-                        Click to auto-fill credentials:
-                      </Typography>
-                      <Box className="demo-buttons">
+                      <Box className="demo-buttons" sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'center' }}>
                         <Button
                           size="small"
-                          variant="outlined"
+                          variant="contained"
                           onClick={() => quickLoginDemo('admin', 'admin123')}
                           sx={{
                             borderRadius: 2,
                             textTransform: 'none',
                             fontWeight: 600,
+                            bgcolor: '#667eea',
+                            '&:hover': { bgcolor: '#5568d3' },
+                            flex: 1,
                           }}
                         >
                           👨‍💼 Admin
                         </Button>
                         <Button
                           size="small"
-                          variant="outlined"
-                          onClick={() => quickLoginDemo('warden', 'warden123')}
+                          variant="contained"
+                          onClick={() => quickLoginDemo('warden1', 'warden123')}
                           sx={{
                             borderRadius: 2,
                             textTransform: 'none',
                             fontWeight: 600,
+                            bgcolor: '#f093fb',
+                            '&:hover': { bgcolor: '#e082ea' },
+                            flex: 1,
                           }}
                         >
                           🔑 Warden
                         </Button>
                         <Button
                           size="small"
-                          variant="outlined"
+                          variant="contained"
                           onClick={() => quickLoginDemo('student1', 'student123')}
                           sx={{
                             borderRadius: 2,
                             textTransform: 'none',
                             fontWeight: 600,
+                            bgcolor: '#4facfe',
+                            '&:hover': { bgcolor: '#3f9bed' },
+                            flex: 1,
                           }}
                         >
                           🎓 Student
                         </Button>
                       </Box>
-                      <Typography variant="caption" color="textSecondary" display="block" mt={2} sx={{ fontStyle: 'italic' }}>
-                        💡 Tip: Use Postman to create accounts with real MySQL data
-                      </Typography>
+                      <Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(255,255,255,0.7)', borderRadius: 1 }}>
+                        <Typography variant="caption" display="block" fontWeight={600} gutterBottom>
+                          ✓ All credentials: password is same as shown
+                        </Typography>
+                        <Typography variant="caption" display="block" color="textSecondary">
+                          • Admin: admin / admin123
+                        </Typography>
+                        <Typography variant="caption" display="block" color="textSecondary">
+                          • Warden: warden1 / warden123
+                        </Typography>
+                        <Typography variant="caption" display="block" color="textSecondary">
+                          • Student: student1 / student123
+                        </Typography>
+                      </Box>
                     </Box>
                   </form>
                 </Fade>
@@ -450,6 +475,26 @@ const LoginPage = () => {
                       variant="outlined"
                       helperText="Minimum 4 characters"
                     />
+
+                    <TextField
+                      fullWidth
+                      select
+                      label="Register As"
+                      name="role"
+                      value={registerData.role}
+                      onChange={handleRegisterChange}
+                      required
+                      margin="normal"
+                      variant="outlined"
+                      helperText="Select your role"
+                      SelectProps={{
+                        native: true,
+                      }}
+                    >
+                      <option value="STUDENT">🎓 Student</option>
+                      <option value="WARDEN">🔑 Warden</option>
+                    </TextField>
+
 
                     <TextField
                       fullWidth

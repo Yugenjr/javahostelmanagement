@@ -50,7 +50,6 @@ public class ComplaintController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ComplaintDto> create(@Valid @RequestBody Complaint complaint) {
         Complaint createdComplaint = complaintService.create(complaint);
         return ResponseEntity.ok(ComplaintDto.fromEntity(createdComplaint));
@@ -70,7 +69,6 @@ public class ComplaintController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARDEN')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         complaintService.delete(id);
         return ResponseEntity.ok().build();

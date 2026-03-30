@@ -14,6 +14,8 @@ import MyRoomPage from './pages/MyRoomPage';
 import MyFeesPage from './pages/MyFeesPage';
 import MyComplaintsPage from './pages/MyComplaintsPage';
 import EventsPage from './pages/EventsPage';
+import SettingsPage from './pages/SettingsPage';
+import ReportsPage from './pages/ReportsPage';
 import LayoutNew from './components/LayoutNew';
 
 const theme = createTheme({
@@ -99,22 +101,6 @@ const ProtectedRoute = ({ children }) => {
 
   return isAuthenticated ? children : <Navigate to="/" />;
 };
-
-// Settings Page Placeholder
-const SettingsPage = () => (
-  <Box sx={{ padding: '24px' }}>
-    <h2>Settings Page - Coming Soon</h2>
-    <p>User settings and preferences will be available here.</p>
-  </Box>
-);
-
-// Reports Page Placeholder
-const ReportsPage = () => (
-  <Box sx={{ padding: '24px' }}>
-    <h2>Reports Page - Coming Soon</h2>
-    <p>Comprehensive reports and analytics will be available here.</p>
-  </Box>
-);
 
 function AppContent() {
   const { isAuthenticated } = useAuth();

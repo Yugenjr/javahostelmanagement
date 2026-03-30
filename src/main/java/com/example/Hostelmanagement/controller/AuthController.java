@@ -3,17 +3,19 @@ package com.example.Hostelmanagement.controller;
 import com.example.Hostelmanagement.dto.AuthRequest;
 import com.example.Hostelmanagement.dto.AuthResponse;
 import com.example.Hostelmanagement.entity.User;
+import com.example.Hostelmanagement.repository.UserRepository;
 import com.example.Hostelmanagement.security.JwtUtil;
 import com.example.Hostelmanagement.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,10 +23,10 @@ import java.util.Map;
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private UserRepository userRepository;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -34,56 +36,76 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
-        String username = request.getUsername();
-        String password = request.getPassword();
+        try {
+            String username = request.getUsername();
+            String password = request.getPassword();
 
-        // Demo credentials with user data
-        if (("admin".equals(username) && "admin123".equals(password))) {
-            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
-            User demoUser = createDemoUser(username, "Admin", "User", "ADMIN");
-            return ResponseEntity.ok(new AuthResponse(token, demoUser));
-        } else if (("warden1".equals(username) && "warden123".equals(password)) ||
-                   ("warden".equals(username) && "warden123".equals(password))) {
-            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
-            User demoUser = createDemoUser(username, "John", "Warden", "WARDEN");
-            return ResponseEntity.ok(new AuthResponse(token, demoUser));
-        } else if (("student1".equals(username) && "student123".equals(password))) {
-            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
-            User demoUser = createDemoUser(username, "Alice", "Johnson", "STUDENT");
-            demoUser.setId(1L);
-            return ResponseEntity.ok(new AuthResponse(token, demoUser));
-        } else if (("student2".equals(username) && "student123".equals(password))) {
-            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
-            User demoUser = createDemoUser(username, "Bob", "Smith", "STUDENT");
-            demoUser.setId(2L);
-            return ResponseEntity.ok(new AuthResponse(token, demoUser));
-        } else if (("student3".equals(username) && "student123".equals(password))) {
-            String token = "demo-token-" + username + "-" + System.currentTimeMillis();
-            User demoUser = createDemoUser(username, "Carol", "Williams", "STUDENT");
-            demoUser.setId(3L);
-            return ResponseEntity.ok(new AuthResponse(token, demoUser));
+            // Find user in database
+            Optional<User> userOptional = userRepository.findByUsername(username);
+
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(401)
+                    .body(Map.of("message", "Invalid username or password"));
+            }
+
+            User user = userOptional.get();
+
+            // Verify password
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                return ResponseEntity.status(401)
+                    .body(Map.of("message", "Invalid username or password"));
+            }
+
+            // Check if user is active
+            if (user.getActive() == null || !user.getActive()) {
+                return ResponseEntity.status(401)
+                    .body(Map.of("message", "Account is inactive. Please contact administrator."));
+            }
+
+            // Generate JWT token with user role
+            String token = jwtUtil.generateToken(username, List.of(user.getRole().name()));
+
+            // Return response with token and user data
+            return ResponseEntity.ok(new AuthResponse(token, user));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                .body(Map.of("message", "Login failed: " + e.getMessage()));
         }
-
-        return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
-    }
-
-    private User createDemoUser(String username, String firstName, String lastName, String role) {
-        User user = new User();
-        user.setId(1L);
-        user.setUsername(username);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(username + "@hostel.com");
-        user.setPhoneNumber("1234567890");
-        user.setRole(User.Role.valueOf(role));
-        return user;
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody User user) {
-        // Only Admin should normally create users; public registration is allowed here for simplicity
-        User created = userService.register(user);
-        return ResponseEntity.ok(created);
+        try {
+            // Check if username already exists
+            if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Username already exists"));
+            }
+
+            // Check if email already exists
+            if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Email already exists"));
+            }
+
+            // Set user as active
+            user.setActive(true);
+
+            // Register user (password will be encoded in service)
+            User created = userService.register(user);
+
+            // Remove password from response
+            created.setPassword(null);
+
+            return ResponseEntity.ok(created);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                .body(Map.of("message", "Registration failed: " + e.getMessage()));
+        }
     }
 }
 

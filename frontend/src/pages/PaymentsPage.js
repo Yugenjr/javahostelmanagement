@@ -148,7 +148,7 @@ const PaymentsPage = () => {
         month: fee.month,
         year: fee.year,
         dueDate: fee.dueDate,
-        description: fee.description || '',
+        remarks: fee.remarks || '',
       });
     } else {
       setEditingFee(null);
@@ -159,7 +159,7 @@ const PaymentsPage = () => {
         month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
         dueDate: '',
-        description: '',
+        remarks: '',
       });
     }
     setOpenFeeDialog(true);
@@ -178,7 +178,7 @@ const PaymentsPage = () => {
         month: parseInt(feeFormData.month),
         year: parseInt(feeFormData.year),
         dueDate: feeFormData.dueDate,
-        description: feeFormData.description,
+        remarks: feeFormData.remarks,
         paymentStatus: 'PENDING',
       };
 
@@ -733,9 +733,9 @@ const PaymentsPage = () => {
                 fullWidth
                 multiline
                 rows={3}
-                label="Description (Optional)"
-                name="description"
-                value={feeFormData.description}
+                label="Remarks (Optional)"
+                name="remarks"
+                value={feeFormData.remarks}
                 onChange={handleFeeFormChange}
               />
             </Grid>

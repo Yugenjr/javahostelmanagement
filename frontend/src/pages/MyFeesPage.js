@@ -120,14 +120,16 @@ const MyFeesPage = () => {
 
   const handlePaymentSubmit = async () => {
     try {
-      await api.put(`/api/fees/${selectedFee.id}/pay`, {
-        ...paymentData,
+      await api.post(`/api/fees/${selectedFee.id}/pay`, {
+        transactionId: paymentData.transactionId,
+        paymentMethod: paymentData.paymentMethod,
         paidDate: new Date().toISOString().split('T')[0],
       });
       toast.success('Payment recorded successfully!');
       fetchMyFees();
       setOpenPayDialog(false);
     } catch (error) {
+      console.error('Payment error:', error);
       toast.error('Failed to record payment. Please try again.');
     }
   };

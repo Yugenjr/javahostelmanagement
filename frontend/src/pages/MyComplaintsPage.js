@@ -16,6 +16,8 @@ import {
   Paper,
   CircularProgress,
   Fab,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   Add,
@@ -24,6 +26,9 @@ import {
   Error,
   Warning,
   Info,
+  Edit,
+  Delete,
+  MoreVert,
 } from '@mui/icons-material';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -37,6 +42,7 @@ const MyComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [editingComplaint, setEditingComplaint] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -100,14 +106,30 @@ const MyComplaintsPage = () => {
     }
   };
 
-  const handleOpenDialog = () => {
-    setFormData({
-      title: '',
-      description: '',
-      type: 'OTHER',
-      priority: 'MEDIUM',
-    });
+  const handleOpenDialog = (complaint = null) => {
+    if (complaint) {
+      setEditingComplaint(complaint);
+      setFormData({
+        title: complaint.title,
+        description: complaint.description,
+        type: complaint.type,
+        priority: complaint.priority,
+      });
+    } else {
+      setEditingComplaint(null);
+      setFormData({
+        title: '',
+        description: '',
+        type: 'OTHER',
+        priority: 'MEDIUM',
+      });
+    }
     setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditingComplaint(null);
   };
 
   const handleChange = (e) => {
@@ -116,12 +138,31 @@ const MyComplaintsPage = () => {
 
   const handleSubmit = async () => {
     try {
-      await api.post('/api/complaints', formData);
-      toast.success('Complaint submitted successfully!');
+      if (editingComplaint) {
+        await api.put(`/api/complaints/${editingComplaint.id}`, formData);
+        toast.success('Complaint updated successfully!');
+      } else {
+        await api.post('/api/complaints', formData);
+        toast.success('Complaint submitted successfully!');
+      }
       fetchMyComplaints();
-      setOpenDialog(false);
+      handleCloseDialog();
     } catch (error) {
-      toast.error('Failed to submit complaint. Please try again.');
+      console.error('Complaint submission error:', error);
+      toast.error(editingComplaint ? 'Failed to update complaint' : 'Failed to submit complaint');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this complaint?')) {
+      try {
+        await api.delete(`/api/complaints/${id}`);
+        toast.success('Complaint deleted successfully!');
+        fetchMyComplaints();
+      } catch (error) {
+        console.error('Delete error:', error);
+        toast.error('Failed to delete complaint');
+      }
     }
   };
 
@@ -335,9 +376,35 @@ const MyComplaintsPage = () => {
                   </Paper>
                 )}
 
-                <Typography variant="caption" color="textSecondary" display="block" mt={2}>
-                  Last updated: {format(new Date(complaint.updatedAt), 'MMM dd, yyyy HH:mm')}
-                </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+                  <Typography variant="caption" color="textSecondary">
+                    Last updated: {format(new Date(complaint.updatedAt), 'MMM dd, yyyy HH:mm')}
+                  </Typography>
+
+                  {/* Edit and Delete buttons - only for PENDING complaints */}
+                  {complaint.status === 'PENDING' && (
+                    <Box display="flex" gap={1}>
+                      <Tooltip title="Edit Complaint">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleOpenDialog(complaint)}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Complaint">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(complaint.id)}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </Box>
               </CardContent>
             </Card>
           </Grid>
@@ -371,9 +438,9 @@ const MyComplaintsPage = () => {
         <Add />
       </Fab>
 
-      {/* Add Complaint Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Submit New Complaint</DialogTitle>
+      {/* Add/Edit Complaint Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingComplaint ? 'Edit Complaint' : 'Submit New Complaint'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
@@ -438,13 +505,14 @@ const MyComplaintsPage = () => {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleSubmit}
+            disabled={!formData.title || !formData.description}
             sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}
           >
-            Submit
+            {editingComplaint ? 'Update' : 'Submit'}
           </Button>
         </DialogActions>
       </Dialog>

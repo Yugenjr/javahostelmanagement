@@ -32,7 +32,9 @@ public class FeeServiceImpl implements FeeService {
         f.setMonth(fee.getMonth());
         f.setYear(fee.getYear());
         f.setDueDate(fee.getDueDate());
-        f.setDescription(fee.getDescription());
+        if (fee.getRemarks() != null) {
+            f.setRemarks(fee.getRemarks());
+        }
         if (fee.getStudent() != null) {
             f.setStudent(fee.getStudent());
         }
