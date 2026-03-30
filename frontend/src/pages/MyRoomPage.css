@@ -1,0 +1,129 @@
+.my-room-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px;
+  margin-bottom: 24px;
+  border-radius: 16px !important;
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  animation: slideDown 0.5s ease-out;
+}
+
+.no-room-card {
+  text-align: center;
+  padding: 80px 40px;
+  border-radius: 16px !important;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.room-details-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  animation: slideUp 0.6s ease-out;
+}
+
+.room-number-badge {
+  text-align: center;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.info-box {
+  text-align: center;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.info-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.amenity-item:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  transform: translateX(4px);
+}
+
+.amenity-item svg {
+  color: #667eea;
+  font-size: 20px;
+}
+
+.sidebar-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  animation: slideRight 0.7s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 960px) {
+  .room-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+}
+

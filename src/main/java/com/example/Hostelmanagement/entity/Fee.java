@@ -1,26 +1,30 @@
 package com.example.Hostelmanagement.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Min;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 @Entity
 @Table(name = "fees")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Fee {
 
     @Id
@@ -74,6 +78,73 @@ public class Fee {
     @JsonBackReference("user-fees")
     private User student;
 
+    // Constructors
+    public Fee() {
+        this.paymentStatus = PaymentStatus.PENDING;
+    }
+
+    public Fee(BigDecimal amount, LocalDate dueDate, FeeType feeType, User student, Integer month, Integer year) {
+        this();
+        this.amount = amount;
+        this.dueDate = dueDate;
+        this.feeType = feeType;
+        this.student = student;
+        this.month = month;
+        this.year = year;
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+
+    public LocalDate getPaidDate() { return paidDate; }
+    public void setPaidDate(LocalDate paidDate) { this.paidDate = paidDate; }
+
+    public FeeType getFeeType() { return feeType; }
+    public void setFeeType(FeeType feeType) { this.feeType = feeType; }
+
+    public PaymentStatus getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
+
+    public String getRemarks() { return remarks; }
+    public void setRemarks(String remarks) { this.remarks = remarks; }
+
+    public Integer getMonth() { return month; }
+    public void setMonth(Integer month) { this.month = month; }
+
+    public Integer getYear() { return year; }
+    public void setYear(Integer year) { this.year = year; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public User getStudent() { return student; }
+    public void setStudent(User student) { this.student = student; }
+
+    // Utility methods
+    public boolean isPaid() {
+        return paymentStatus == PaymentStatus.PAID;
+    }
+
+    public boolean isOverdue() {
+        return paymentStatus != PaymentStatus.PAID && dueDate.isBefore(LocalDate.now());
+    }
+
     public enum FeeType {
         HOSTEL_FEE, MESS_FEE, SECURITY_DEPOSIT, MAINTENANCE_FEE, OTHER
     }
@@ -84,13 +155,5 @@ public class Fee {
 
     public enum PaymentMethod {
         CASH, CARD, BANK_TRANSFER, UPI, CHEQUE, ONLINE
-    }
-
-    public boolean isPaid() {
-        return paymentStatus == PaymentStatus.PAID;
-    }
-
-    public boolean isOverdue() {
-        return paymentStatus != PaymentStatus.PAID && dueDate.isBefore(LocalDate.now());
     }
 }

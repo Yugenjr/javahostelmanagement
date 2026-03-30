@@ -33,6 +33,13 @@ public class ComplaintController {
         return ResponseEntity.ok(complaints);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ComplaintDto> getById(@PathVariable Long id) {
+        return complaintService.findById(id)
+                .map(complaint -> ResponseEntity.ok(ComplaintDto.fromEntity(complaint)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/student/{studentId}")
     public ResponseEntity<List<ComplaintDto>> getByStudent(@PathVariable Long studentId) {
         User student = userRepository.findById(studentId).orElseThrow(() -> new RuntimeException("Student not found"));
@@ -43,10 +50,15 @@ public class ComplaintController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ComplaintDto> create(@Valid @RequestBody Complaint complaint) {
         Complaint createdComplaint = complaintService.create(complaint);
         return ResponseEntity.ok(ComplaintDto.fromEntity(createdComplaint));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ComplaintDto> update(@PathVariable Long id, @Valid @RequestBody Complaint complaint) {
+        Complaint updatedComplaint = complaintService.update(id, complaint);
+        return ResponseEntity.ok(ComplaintDto.fromEntity(updatedComplaint));
     }
 
     @PutMapping("/{id}/status")
@@ -54,6 +66,12 @@ public class ComplaintController {
     public ResponseEntity<ComplaintDto> updateStatus(@PathVariable Long id, @RequestParam Complaint.ComplaintStatus status, @RequestParam(required = false) String remarks) {
         Complaint updatedComplaint = complaintService.updateStatus(id, status, remarks);
         return ResponseEntity.ok(ComplaintDto.fromEntity(updatedComplaint));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        complaintService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }
 
